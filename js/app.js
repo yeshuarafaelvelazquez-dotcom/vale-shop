@@ -72,8 +72,10 @@
     $('#rejilla').innerHTML = lista.map((p, i) => {
       const agotado = stockTotal(p) <= 0;
       const colores = [...new Set(p.variantes.map(v => v.color))];
+      const fotoColor = (p.variantes.find(v => v.foto) || {}).foto;
+      const principal = (p.fotos[0] && p.fotos[0].indexOf('...') < 0) ? foto(p) : (fotoColor ? '<img src="' + esc(fotoColor) + '" alt="' + esc(p.nombre) + '" loading="lazy">' : foto(p));
       return '<article class="tarjeta" data-id="' + esc(p.id) + '" style="animation-delay:' + Math.min(i, 12) * 40 + 'ms">' +
-        '<div class="tarjeta-foto">' + foto(p) + (p.fotos[1] ? foto(p, 1, 'segunda') : '') +
+        '<div class="tarjeta-foto">' + principal + (p.fotos[1] ? foto(p, 1, 'segunda') : '') +
           (agotado ? '<span class="etiqueta">Agotado</span>' : p.drop ? '<span class="etiqueta negra">Nuevo</span>' : '') +
           '<button class="corazon' + (estado.deseos.includes(p.id) ? ' lleno' : '') + '" data-deseo="' + esc(p.id) + '" aria-label="Agregar a deseos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>' +
         '</div>' +
@@ -98,7 +100,11 @@
       const vSel = p.variantes.find(v => v.talla === talla && v.color === color);
       const hayStock = (t, c) => p.variantes.some(v => (t == null || v.talla === t) && (c == null || v.color === c) && v.stock > 0);
       $('#ficha').innerHTML =
-        '<div class="ficha-fotos">' + (fotos.length ? fotos.map((_, i) => foto(p, i)).join('') : foto(p)) + '</div>' +
+        '<div class="ficha-fotos">' + (() => {
+          const vc = color && p.variantes.find(v => v.color === color && v.foto);
+          const lista = [vc ? vc.foto : ''].concat(fotos).filter(Boolean).filter((f, i, a) => a.indexOf(f) === i);
+          return lista.length ? lista.map(src => '<img src="' + esc(src) + '" alt="' + esc(p.nombre + (color ? ' ' + color : '')) + '" loading="lazy">').join('') : foto(p);
+        })() + '</div>' +
         '<div class="ficha-datos">' +
           '<p class="sobre">' + esc(p.categoria || '') + (p.drop ? ' · Nuevo' : '') + '</p>' +
           '<h2>' + esc(p.nombre) + '</h2>' +
@@ -190,7 +196,7 @@
     cuerpo.innerHTML = prog + estado.bolsa.map(i => {
       const x = variante(i.sku); if (!x) return '';
       const pu = precioDe(x.p);
-      return '<div class="linea"><div class="linea-foto">' + foto(x.p) + '</div><div><h4>' + esc(x.p.nombre) + '</h4><small>' + esc(x.v.color) + ' · Talla ' + esc(x.v.talla) + '</small>' +
+      return '<div class="linea"><div class="linea-foto">' + (x.v.foto ? '<img src="' + esc(x.v.foto) + '" alt="">' : foto(x.p)) + '</div><div><h4>' + esc(x.p.nombre) + '</h4><small>' + esc(x.v.color) + ' · Talla ' + esc(x.v.talla) + '</small>' +
         '<div class="cantidad"><button data-menos="' + esc(i.sku) + '">−</button><span>' + i.cantidad + '</span><button data-mas="' + esc(i.sku) + '">+</button></div><br><button class="quitar" data-quitar="' + esc(i.sku) + '">Quitar</button></div>' +
         '<div class="linea-precio">' + (may && pu < x.p.precio ? '<s>' + dinero(x.p.precio * i.cantidad) + '</s>' : '') + dinero(pu * i.cantidad) + '</div></div>';
     }).join('');
@@ -395,8 +401,8 @@
       try {
         const r = await api({ accion: 'envio', cp, items: JSON.stringify(estado.bolsa.map(i => ({ sku: i.sku, cantidad: i.cantidad }))) });
         if (!r.ok) {
-          box.innerHTML = '<p class="nota" style="margin:0">' + (r.porCotizar ? 'Te confirmamos el costo del envío por WhatsApp con la paquetería más barata.' : esc(r.error)) + '</p>';
-          cotizado = !r.porCotizar; pintarTotal(); return;
+          box.innerHTML = '<p class="nota" style="margin:0">' + (r.porCotizar || r.error === 'Acción no válida' ? 'Te confirmamos el costo del envío por WhatsApp con la paquetería más barata.' : esc(r.error)) + '</p>';
+          cotizado = !(r.porCotizar || r.error === 'Acción no válida'); pintarTotal(); return;
         }
         cotizado = true;
         box.innerHTML = r.opciones.map((o, i) =>
@@ -504,8 +510,7 @@
   function aplicarTienda() {
     const T = estado.tienda;
     $$('[data-minimo]').forEach(e => e.textContent = minimo());
-    const h1 = $('#bannerTexto');
-    if (T.banner && h1.getAttribute('aria-label') !== T.banner && h1.textContent !== T.banner) { h1.textContent = T.banner; delete h1.dataset.tt; h1.classList.remove('tt-listo'); if (window.ValeTechText) window.ValeTechText(h1, 200); }
+    if (T.banner) $('#bannerTexto').textContent = T.banner;
     $('#lnkWhats').href = linkWhats('Hola, vengo de la página de Vale Shop');
     [['#lnkInsta', T.instagram], ['#lnkFace', T.facebook], ['#lnkTik', T.tiktok]].forEach(([s, u]) => { if (u) { $(s).href = u; $(s).hidden = false; } });
     $('#pieHorario').textContent = T.horario ? 'Atención: ' + T.horario : '';

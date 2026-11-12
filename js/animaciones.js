@@ -87,9 +87,7 @@
 
   function iniciar() {
     if (reducir) { document.documentElement.classList.add('sin-movimiento'); return; }
-    techText(document.querySelector('.cabecera .logo'), 100);
-    techText(document.getElementById('bannerTexto'), 450);
-    if (!(window.VALE_CONFIG && window.VALE_CONFIG.FOTO_PORTADA)) plasma(document.getElementById('portadaImg'));
+    techText(document.querySelector('.portada .bienvenida'), 250);
     revelar(); saltoBolsa();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();

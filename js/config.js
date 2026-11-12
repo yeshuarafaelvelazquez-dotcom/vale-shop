@@ -5,7 +5,7 @@ window.VALE_CONFIG = {
   API: 'https://script.google.com/macros/s/AKfycbwcKwzcnyBKOGK7lKzp4ZqIOEsKWQse3DylXSVwWoTJG77MyiyQ2jD9W2gpWIYjiHa9ug/exec',
 
   // Foto grande de la portada (puede ser un link de Google Drive o de cualquier imagen)
-  FOTO_PORTADA: 'img/portada.jpg',
+  FOTO_PORTADA: '',   // pon aquí 'img/portada.jpg' cuando tengas una foto SIN texto
 
   // Mientras se conecta la paquetería, el envío se cotiza y se confirma por WhatsApp
   ENVIO_POR_COTIZAR: true,
