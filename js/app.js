@@ -197,7 +197,7 @@
     const t = totales();
     pie.innerHTML = '<div class="fila"><span>Piezas</span><span>' + piezas + '</span></div>' +
       (t.ahorro > 0 ? '<div class="fila"><span>Ahorro mayoreo</span><span>−' + dinero(t.ahorro) + '</span></div>' : '') +
-      '<div class="fila"><span>Envío</span><span>' + (CFG.ENVIO_POR_COTIZAR ? 'Se cotiza al confirmar' : '—') + '</span></div>' +
+      '<div class="fila"><span>Envío</span><span>Se calcula con tu C.P.</span></div>' +
       '<div class="fila total"><span>Subtotal</span><span>' + dinero(t.sub) + '</span></div>' +
       '<button class="btn btn-bloque" id="irPagar" style="margin-top:14px">Continuar con la compra</button>';
     $('#irPagar').onclick = iniciarCompra;
@@ -370,15 +370,45 @@
         '<div class="dos">' + campo('cp', 'Código postal', c.cp, 'text', 'postal-code') + campo('referencias', 'Referencias (opcional)', c.referencias) + '</div>' +
         '<h3 class="seccion-titulo">Forma de pago</h3>' +
         '<div class="metodos">' +
-          '<label class="metodo"><input type="radio" name="metodo" value="Mercado Pago" checked><span><b>Mercado Pago</b><small>Tarjeta de crédito o débito, OXXO y más.</small></span></label>' +
-          '<label class="metodo"><input type="radio" name="metodo" value="Transferencia"><span><b>Transferencia</b><small>Te damos la CLABE y nos mandas tu comprobante por WhatsApp.</small></span></label>' +
+          '<label class="metodo"><input type="radio" name="metodo" value="Transferencia" checked><span><b>Transferencia</b><small>Te damos la CLABE y nos mandas tu comprobante por WhatsApp.</small></span></label>' +
           '<label class="metodo"><input type="radio" name="metodo" value="Depósito"><span><b>Depósito</b><small>En OXXO o banco. Nos mandas tu comprobante por WhatsApp.</small></span></label>' +
         '</div>' +
+        '<h3 class="seccion-titulo">Envío</h3><div id="envioOpciones" class="metodos"><p class="nota" style="margin:0">Escribe tu código postal para ver las paqueterías y precios.</p></div>' +
         '<div class="resumen"><div class="fila"><span>' + piezasBolsa() + ' piezas · ' + (esMayoreo() ? 'Mayoreo' : 'Menudeo') + '</span><span>' + dinero(t.sub) + '</span></div>' +
-          '<div class="fila"><span>Envío</span><span>Por cotizar</span></div>' +
-          '<p class="nota" style="margin-bottom:0">El costo del envío depende de tu código postal y del peso. Te lo confirmamos por WhatsApp con la paquetería más barata.</p></div>' +
-        '<button class="btn btn-bloque" type="submit" id="confirmar">Confirmar pedido · ' + dinero(t.sub) + '</button>' +
+          '<div class="fila"><span>Envío</span><span id="resEnvio">—</span></div>' +
+          '<div class="fila total"><span>Total</span><span id="resTotal">' + dinero(t.sub) + '</span></div></div>' +
+        '<button class="btn btn-bloque" type="submit" id="confirmar">Confirmar pedido</button>' +
       '</form>');
+    let envioSel = null, cotizado = false, ultimoCp = '';
+    const pintarTotal = () => {
+      const e = envioSel ? envioSel.precio : 0;
+      $('#resEnvio').textContent = envioSel ? (e === 0 ? 'Gratis' : dinero(e)) : (cotizado ? '—' : 'Por cotizar');
+      $('#resTotal').textContent = dinero(t.sub + e) + (envioSel ? '' : ' + envío');
+      $('#confirmar').textContent = 'Confirmar pedido · ' + dinero(t.sub + e) + (envioSel ? '' : ' + envío');
+    };
+    async function cotizar() {
+      const cp = ($('#c_cp').value || '').replace(/\D/g, '');
+      if (cp.length !== 5 || cp === ultimoCp) return;
+      ultimoCp = cp; envioSel = null;
+      const box = $('#envioOpciones');
+      box.innerHTML = '<p class="nota cotizando" style="margin:0">Buscando la paquetería más barata…</p>';
+      try {
+        const r = await api({ accion: 'envio', cp, items: JSON.stringify(estado.bolsa.map(i => ({ sku: i.sku, cantidad: i.cantidad }))) });
+        if (!r.ok) {
+          box.innerHTML = '<p class="nota" style="margin:0">' + (r.porCotizar ? 'Te confirmamos el costo del envío por WhatsApp con la paquetería más barata.' : esc(r.error)) + '</p>';
+          cotizado = !r.porCotizar; pintarTotal(); return;
+        }
+        cotizado = true;
+        box.innerHTML = r.opciones.map((o, i) =>
+          '<label class="metodo"><input type="radio" name="envio" value="' + i + '"' + (i === 0 ? ' checked' : '') + '><span style="flex:1"><b>' + esc(o.nombre) + (i === 0 ? ' <em class="mas-barata">Más barata</em>' : '') + '</b><small>' + esc(o.dias || '') + '</small></span><span class="precio-envio">' + (o.precio === 0 ? 'Gratis' : dinero(o.precio)) + '</span></label>').join('') +
+          (r.gratisDesde && !r.opciones[0].gratis ? '<p class="nota" style="margin:4px 0 0">Envío gratis en compras desde ' + dinero(r.gratisDesde) + '.</p>' : '');
+        envioSel = r.opciones[0];
+        $$('#envioOpciones input[name=envio]').forEach(inp => inp.onchange = () => { envioSel = r.opciones[+inp.value]; pintarTotal(); });
+        pintarTotal();
+      } catch (err) { box.innerHTML = '<p class="nota" style="margin:0">No pudimos cotizar ahora. Te confirmamos el envío por WhatsApp.</p>'; ultimoCp = ''; }
+    }
+    $('#c_cp').addEventListener('input', () => { if (($('#c_cp').value || '').replace(/\D/g, '').length === 5) cotizar(); });
+    pintarTotal(); cotizar();
     $('#fPago').onsubmit = async e => {
       e.preventDefault();
       const d = datosForm(e.target);
@@ -387,15 +417,14 @@
       const btn = $('#confirmar'); btn.disabled = true; btn.textContent = 'Procesando…';
       try {
         const res = await apiPost({
-          accion: 'pedido', metodo: d.metodo, envio: 0,
+          accion: 'pedido', metodo: d.metodo, envio: envioSel ? { carrier: envioSel.carrier, servicio: envioSel.servicio } : null,
           clienta: { nombre: d.nombre, correo: estado.cuenta.correo, whatsapp: d.whatsapp, cp: d.cp,
             direccion: d.calle + ', Col. ' + d.colonia + ', ' + d.ciudad + ', ' + d.edo + (d.referencias ? ' (Ref: ' + d.referencias + ')' : '') },
           items: estado.bolsa.map(i => ({ sku: i.sku, cantidad: i.cantidad }))
         });
         if (!res.ok) {
-          btn.disabled = false; btn.textContent = 'Confirmar pedido · ' + dinero(t.sub);
+          btn.disabled = false; pintarTotal();
           aviso(res.error || 'No se pudo crear el pedido');
-          if (/Mercado Pago/.test(res.error || '')) aviso('Mercado Pago aún no está activo. Elige transferencia o depósito.');
           if (res.pedido) recordarPedido(res, d.metodo);
           return;
         }
@@ -405,7 +434,7 @@
         if (res.linkPago) { window.location.href = res.linkPago; return; }
         mostrarDatosPago(res, d.metodo);
       } catch (err) {
-        btn.disabled = false; btn.textContent = 'Confirmar pedido · ' + dinero(t.sub);
+        btn.disabled = false; pintarTotal();
         aviso('Sin conexión. Intenta de nuevo.');
       }
     };
@@ -425,13 +454,13 @@
     const T = estado.tienda;
     panelGen('Pedido recibido',
       '<div class="exito"><p class="num">Pedido ' + esc(res.pedido) + '</p><h3>¡Gracias, ' + esc(estado.cuenta.nombre.split(' ')[0]) + '!</h3>' +
-      '<p class="nota">Total de productos: <b>' + dinero(res.total) + '</b> + envío por cotizar.</p></div>' +
+      '<p class="nota">' + (res.envioCotizado ? 'Total a pagar: <b>' + dinero(res.total) + '</b> (productos ' + dinero(res.subtotal) + ' + envío ' + (res.envio ? dinero(res.envio) : 'gratis') + ' con ' + esc(res.paqueteria) + ')' : 'Total de productos: <b>' + dinero(res.total) + '</b> + envío por cotizar.') + '</p></div>' +
       '<div class="caja-banco">' + (metodo === 'Transferencia'
         ? '<b>Transferencia</b><br>Banco: ' + esc(T.banco || 'Pendiente') + '<br>Titular: ' + esc(T.titular || 'Pendiente') + '<br>CLABE: <b>' + esc(T.clabe || 'Pendiente') + '</b>'
         : '<b>Depósito</b><br>Banco: ' + esc(T.banco || 'Pendiente') + '<br>Titular: ' + esc(T.titular || 'Pendiente') + '<br>Tarjeta: <b>' + esc(T.tarjeta || 'Pendiente') + '</b>') +
       '<br>Concepto: <b>' + esc(res.pedido) + '</b></div>' +
-      '<p class="nota">1. Te mandamos el costo del envío por WhatsApp.<br>2. Pagas el total y nos mandas tu comprobante.<br>3. Empacamos y te enviamos tu número de guía.</p>' +
-      '<a class="btn btn-bloque" target="_blank" rel="noopener" href="' + linkWhats('Hola, hice el pedido ' + res.pedido + ' en Vale Shop por ' + dinero(res.total) + ' (' + metodo + '). Mi C.P. es ' + estado.cuenta.cp + '. ¿Me confirmas el envío?') + '">Enviar mensaje por WhatsApp</a>');
+      '<p class="nota">' + (res.envioCotizado ? '1. Haz tu ' + (metodo === 'Transferencia' ? 'transferencia' : 'depósito') + ' por el total.<br>2. Mándanos tu comprobante por WhatsApp.<br>3. Empacamos y te enviamos tu número de guía.' : '1. Te mandamos el costo del envío por WhatsApp.<br>2. Pagas el total y nos mandas tu comprobante.<br>3. Empacamos y te enviamos tu número de guía.') + '</p>' +
+      '<a class="btn btn-bloque" target="_blank" rel="noopener" href="' + linkWhats(res.envioCotizado ? 'Hola, hice el pedido ' + res.pedido + ' en Vale Shop por ' + dinero(res.total) + ' (' + metodo + '). Te mando mi comprobante.' : 'Hola, hice el pedido ' + res.pedido + ' en Vale Shop por ' + dinero(res.total) + ' (' + metodo + '). Mi C.P. es ' + estado.cuenta.cp + '. ¿Me confirmas el envío?') + '">Enviar mensaje por WhatsApp</a>');
   }
 
   /* ---------- Mis pedidos ---------- */
