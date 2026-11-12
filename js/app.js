@@ -502,10 +502,26 @@
       const d = await api({ accion: 'catalogo' });
       if (!d.ok) throw new Error(d.error);
       estado.tienda = d.tienda || {}; estado.productos = d.productos || [];
-      limpiarBolsa(); aplicarTienda(); pintarCatalogo(); contadores();
+      limpiarBolsa(); aplicarTienda(); pintarCategorias(d.categorias); pintarCatalogo(); contadores();
     } catch (e) {
       if (!silencioso) $('#rejilla').innerHTML = '<div class="vacio">No pudimos cargar la colección. Recarga la página.</div>';
     }
+  }
+  /* Botones de categorías: salen de la tabla "Categorías" de la hoja Configuración */
+  function pintarCategorias(lista) {
+    if (!Array.isArray(lista)) return;
+    const usadas = lista.filter(c => estado.productos.some(p => String(p.categoria).trim() === c));
+    const boton = c => { const b = document.createElement('button'); b.setAttribute('data-cat', ''); b.dataset.filtro = c; b.textContent = c; return b; };
+    const filtros = $('#filtros'), menu = $('#menuLista');
+    filtros.querySelectorAll('[data-cat]').forEach(b => b.remove());
+    usadas.forEach(c => filtros.appendChild(boton(c)));
+    if (menu) {
+      menu.querySelectorAll('[data-cat]').forEach(b => b.remove());
+      const hr = menu.querySelector('hr');
+      usadas.forEach(c => menu.insertBefore(boton(c), hr));
+    }
+    $$('.nav-principal [data-filtro="Accesorios"], header [data-filtro="Accesorios"]').forEach(b => b.hidden = usadas.indexOf('Accesorios') < 0);
+    if (!['Todo', 'Drop'].includes(estado.filtro) && usadas.indexOf(estado.filtro) < 0) estado.filtro = 'Todo';
   }
   function aplicarTienda() {
     const T = estado.tienda;
