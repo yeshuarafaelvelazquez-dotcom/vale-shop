@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilos.css">
+  <link rel="icon" type="image/png" href="img/logo.png">
 </head>
 <body>
 
@@ -26,8 +27,7 @@
       </nav>
     </div>
     <a href="#" class="logo" data-ir="inicio" aria-label="Vale Shop, inicio">
-      <span class="logo-texto">Vale Shop</span>
-      <svg class="logo-corazon" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 20.5S2.5 14.6 2.5 7.9A4.9 4.9 0 0 1 12 5.6a4.9 4.9 0 0 1 9.5 2.3c0 6.7-9.5 12.6-9.5 12.6z"/></svg>
+      <img class="logo-img" src="img/logo.png" alt="Vale Shop">
     </a>
     <div class="cab-der">
       <button class="icono" id="btnBuscar" aria-label="Buscar">
@@ -86,8 +86,7 @@
 
       <div class="portada-texto">
         <p class="bienvenida">Bienvenida a</p>
-        <h1 class="titulo-script">Vale Shop</h1>
-        <svg class="corazon-titulo" viewBox="0 0 40 36" aria-hidden="true"><path class="corazon-dibujo" d="M20 33S3 23 3 12A8.5 8.5 0 0 1 20 8a8.5 8.5 0 0 1 17 4c0 11-17 21-17 21z"/></svg>
+        <h1 class="titulo-logo"><img src="img/logo.png" alt="Vale Shop Womenswear"></h1>
         <p class="subtitulo" id="bannerTexto">Moda, estilo y comodidad en un solo lugar.</p>
         <button class="btn btn-pill" data-filtro="Todo">Comprar ahora</button>
       </div>
@@ -143,13 +142,14 @@
   </main>
 
   <footer class="pie">
-    <div class="logo"><span class="logo-texto">Vale Shop</span></div>
+    <div class="logo"><img class="logo-img logo-pie" src="img/logo.png" alt="Vale Shop"></div>
     <div class="pie-links">
       <a id="lnkWhats" target="_blank" rel="noopener">WhatsApp</a>
       <a id="lnkInsta" target="_blank" rel="noopener" hidden>Instagram</a>
       <a id="lnkFace" target="_blank" rel="noopener" hidden>Facebook</a>
       <a id="lnkTik" target="_blank" rel="noopener" hidden>TikTok</a>
       <a href="#" id="lnkPoliticas">Cambios y devoluciones</a>
+      <a href="#" data-aviso>Aviso de privacidad</a>
     </div>
     <p class="pie-mini" id="pieHorario"></p>
     <p class="pie-mini">© <span id="anio"></span> Vale Shop · Hecho por Apollo</p>
@@ -194,6 +194,14 @@
     <div class="modal-caja" role="dialog" aria-modal="true">
       <button class="icono modal-cerrar" data-cerrar>✕</button>
       <div class="ficha" id="ficha"></div>
+    </div>
+  </div>
+
+  <!-- Aviso de privacidad -->
+  <div class="modal modal-aviso" id="avisoModal" aria-hidden="true">
+    <div class="modal-caja aviso-caja" role="dialog" aria-modal="true" aria-label="Aviso de privacidad">
+      <button class="icono modal-cerrar" data-cerrar-aviso>✕</button>
+      <div class="aviso-legal" id="avisoTexto"></div>
     </div>
   </div>
 

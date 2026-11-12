@@ -258,7 +258,7 @@
       : tabs + '<p class="nota">Crea tu cuenta con tu correo. Solo te pedimos lo necesario para enviarte tus pedidos.</p>' +
         '<form class="form" id="fAcceso" novalidate>' + campo('nombre', 'Nombre completo', '', 'text', 'name') + campo('correo', 'Correo electrónico', '', 'email', 'email') +
         campo('whatsapp', 'WhatsApp (10 dígitos)', '', 'tel', 'tel') + campo('pass', 'Contraseña (mínimo 6)', '', 'password', 'new-password') +
-        '<button class="btn btn-bloque" type="submit">Crear cuenta</button>' + google + '</form>';
+        '<button class="btn btn-bloque" type="submit">Crear cuenta</button>' + '<p class="nota-aviso">Al continuar aceptas nuestro <a data-aviso>Aviso de privacidad</a>.</p>' + google + '</form>';
     panelGen(modo === 'entrar' ? 'Mi cuenta' : 'Crear cuenta', html);
     $$('#genCuerpo [data-modo]').forEach(b => b.onclick = () => pantallaAcceso(b.dataset.modo));
     const f = $('#fAcceso');
@@ -383,7 +383,7 @@
         '<div class="resumen"><div class="fila"><span>' + piezasBolsa() + ' piezas · ' + (esMayoreo() ? 'Mayoreo' : 'Menudeo') + '</span><span>' + dinero(t.sub) + '</span></div>' +
           '<div class="fila"><span>Envío</span><span id="resEnvio">—</span></div>' +
           '<div class="fila total"><span>Total</span><span id="resTotal">' + dinero(t.sub) + '</span></div></div>' +
-        '<button class="btn btn-bloque" type="submit" id="confirmar">Confirmar pedido</button>' +
+        '<button class="btn btn-bloque" type="submit" id="confirmar">Confirmar pedido</button>' + '<p class="nota-aviso">Al continuar aceptas nuestro <a data-aviso>Aviso de privacidad</a>.</p>' +
       '</form>');
     let envioSel = null, cotizado = false, ultimoCp = '';
     const pintarTotal = () => {
@@ -496,6 +496,28 @@
       '<a class="btn btn-bloque" target="_blank" rel="noopener" href="' + linkWhats('Hola, tengo una duda de mi pedido ' + id) + '">Escribir por WhatsApp</a>');
   }
 
+  /* ---------- Aviso de privacidad (se llena solo con los datos de Mi Tienda) ---------- */
+  function abrirAviso() {
+    const T = estado.tienda, tienda = esc(T.nombre || 'Vale Shop');
+    const resp = esc(T.titular || T.nombre || 'Vale Shop');
+    const contacto = [T.correo ? 'el correo <b>' + esc(T.correo) + '</b>' : '', T.whatsapp ? 'WhatsApp <b>' + esc(T.whatsapp) + '</b>' : ''].filter(Boolean).join(' o ') || 'nuestro WhatsApp';
+    const fecha = new Date(2026, 10, 12).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+    $('#avisoTexto').innerHTML =
+      '<h3>Aviso de privacidad</h3>' +
+      '<p><b>' + resp + '</b>, que opera la tienda en línea <b>' + tienda + '</b>, es responsable del uso y protección de tus datos personales, de acuerdo con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Puedes contactarnos por ' + contacto + '.</p>' +
+      '<h4>¿Qué datos recabamos?</h4><ul><li>Nombre completo.</li><li>Correo electrónico.</li><li>Número de teléfono / WhatsApp.</li><li>Dirección de envío y código postal.</li><li>Tu historial de pedidos, lista de deseos y reseñas.</li></ul>' +
+      '<p>No recabamos datos sensibles ni datos bancarios: los pagos se hacen por transferencia o depósito directamente en tu banco.</p>' +
+      '<h4>¿Para qué los usamos?</h4><p>Finalidades necesarias para darte el servicio:</p><ul><li>Procesar, confirmar y enviar tus pedidos.</li><li>Cotizar el envío y generar la guía con la paquetería.</li><li>Comunicarnos contigo por WhatsApp o correo sobre tu pedido, tu pago y el estado de tu paquete.</li><li>Crear y administrar tu cuenta, tu lista de deseos y tus reseñas.</li><li>Atender cambios, devoluciones y aclaraciones.</li></ul>' +
+      '<p>Finalidad adicional (no necesaria): enviarte novedades y promociones. Si no quieres recibirlas, avísanos por ' + contacto + ' y dejaremos de enviarlas; esto no afecta tus compras.</p>' +
+      '<h4>¿Con quién compartimos tus datos?</h4><p>Solo con quienes lo necesitan para entregarte tu pedido: la paquetería y la plataforma de envíos que la contrata (nombre, teléfono y dirección). También usamos servicios de Google (Google Sheets y Firebase) para guardar la información de forma segura. No vendemos ni rentamos tus datos.</p>' +
+      '<h4>Tus derechos (ARCO)</h4><p>Tienes derecho a <b>A</b>cceder a tus datos, <b>R</b>ectificarlos, <b>C</b>ancelarlos u <b>O</b>ponerte a su uso, así como a revocar tu consentimiento. Para hacerlo, escríbenos por ' + contacto + ' con tu nombre, el derecho que quieres ejercer y una forma de identificarte. Te responderemos en un máximo de 20 días hábiles. También puedes corregir tus datos desde "Mi cuenta".</p>' +
+      '<h4>Cookies y almacenamiento</h4><p>La página guarda en tu navegador tu bolsa de compra y tu sesión para que no se pierdan. No usamos cookies de publicidad.</p>' +
+      '<h4>Cambios a este aviso</h4><p>Si este aviso cambia, publicaremos la versión nueva en esta misma página.</p>' +
+      '<p class="nota">Última actualización: ' + fecha + '.</p>';
+    const m = $('#avisoModal'); m.classList.add('abierto'); m.setAttribute('aria-hidden', 'false'); $('#avisoTexto').parentNode.scrollTop = 0;
+  }
+  function cerrarAviso() { const m = $('#avisoModal'); m.classList.remove('abierto'); m.setAttribute('aria-hidden', 'true'); }
+
   /* ---------- Cargar datos ---------- */
   async function cargarCatalogo(silencioso) {
     try {
@@ -538,6 +560,8 @@
     const deseo = t.closest('[data-deseo]'); if (deseo) { e.stopPropagation(); alternarDeseo(deseo.dataset.deseo); return; }
     const tarjeta = t.closest('.tarjeta'); if (tarjeta) { abrirFicha(tarjeta.dataset.id); return; }
     const f = t.closest('[data-filtro]'); if (f) { estado.filtro = f.dataset.filtro; estado.busqueda = ''; $('#inputBuscar').value = ''; cerrarTodo(); pintarCatalogo(); document.querySelector('.filtros').scrollIntoView({ behavior: 'smooth' }); return; }
+    if (t.closest('[data-aviso]')) { e.preventDefault(); abrirAviso(); return; }
+    if (t.closest('[data-cerrar-aviso]') || t.id === 'avisoModal') { cerrarAviso(); return; }
     if (t.closest('[data-cerrar]') || t.id === 'velo' || t.id === 'modal') { cerrarTodo(); return; }
     const ab = t.closest('[data-abrir]'); if (ab) { ({ cuenta: () => formCuenta(), deseos: verDeseos, pedidos: verPedidos })[ab.dataset.abrir](); return; }
     const mas = t.closest('[data-mas]'); if (mas) { cambiar(mas.dataset.mas, 1); return; }
