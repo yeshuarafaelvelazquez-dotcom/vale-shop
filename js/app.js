@@ -383,7 +383,7 @@
         '<div class="resumen"><div class="fila"><span>' + piezasBolsa() + ' piezas · ' + (esMayoreo() ? 'Mayoreo' : 'Menudeo') + '</span><span>' + dinero(t.sub) + '</span></div>' +
           '<div class="fila"><span>Envío</span><span id="resEnvio">—</span></div>' +
           '<div class="fila total"><span>Total</span><span id="resTotal">' + dinero(t.sub) + '</span></div></div>' +
-        '<button class="btn btn-bloque" type="submit" id="confirmar">Confirmar pedido</button>' + '<p class="nota-aviso">Al continuar aceptas nuestro <a data-aviso>Aviso de privacidad</a>.</p>' +
+        '<button class="btn btn-bloque" type="submit" id="confirmar">Confirmar pedido</button>' + '<p class="nota-aviso">Al confirmar aceptas los <a data-terminos>Términos y condiciones</a> y el <a data-aviso>Aviso de privacidad</a>.</p>' +
       '</form>');
     let envioSel = null, cotizado = false, ultimoCp = '';
     const pintarTotal = () => {
@@ -496,25 +496,53 @@
       '<a class="btn btn-bloque" target="_blank" rel="noopener" href="' + linkWhats('Hola, tengo una duda de mi pedido ' + id) + '">Escribir por WhatsApp</a>');
   }
 
-  /* ---------- Aviso de privacidad (se llena solo con los datos de Mi Tienda) ---------- */
-  function abrirAviso() {
-    const T = estado.tienda, tienda = esc(T.nombre || 'Vale Shop');
-    const resp = esc(T.titular || T.nombre || 'Vale Shop');
+  /* ---------- Textos legales (se llenan solos con los datos de Mi Tienda) ---------- */
+  function datosLegales() {
+    const T = estado.tienda;
     const contacto = [T.correo ? 'el correo <b>' + esc(T.correo) + '</b>' : '', T.whatsapp ? 'WhatsApp <b>' + esc(T.whatsapp) + '</b>' : ''].filter(Boolean).join(' o ') || 'nuestro WhatsApp';
-    const fecha = new Date(2026, 10, 12).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-    $('#avisoTexto').innerHTML =
-      '<h3>Aviso de privacidad</h3>' +
-      '<p><b>' + resp + '</b>, que opera la tienda en línea <b>' + tienda + '</b>, es responsable del uso y protección de tus datos personales, de acuerdo con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Puedes contactarnos por ' + contacto + '.</p>' +
-      '<h4>¿Qué datos recabamos?</h4><ul><li>Nombre completo.</li><li>Correo electrónico.</li><li>Número de teléfono / WhatsApp.</li><li>Dirección de envío y código postal.</li><li>Tu historial de pedidos, lista de deseos y reseñas.</li></ul>' +
-      '<p>No recabamos datos sensibles ni datos bancarios: los pagos se hacen por transferencia o depósito directamente en tu banco.</p>' +
-      '<h4>¿Para qué los usamos?</h4><p>Finalidades necesarias para darte el servicio:</p><ul><li>Procesar, confirmar y enviar tus pedidos.</li><li>Cotizar el envío y generar la guía con la paquetería.</li><li>Comunicarnos contigo por WhatsApp o correo sobre tu pedido, tu pago y el estado de tu paquete.</li><li>Crear y administrar tu cuenta, tu lista de deseos y tus reseñas.</li><li>Atender cambios, devoluciones y aclaraciones.</li></ul>' +
-      '<p>Finalidad adicional (no necesaria): enviarte novedades y promociones. Si no quieres recibirlas, avísanos por ' + contacto + ' y dejaremos de enviarlas; esto no afecta tus compras.</p>' +
-      '<h4>¿Con quién compartimos tus datos?</h4><p>Solo con quienes lo necesitan para entregarte tu pedido: la paquetería y la plataforma de envíos que la contrata (nombre, teléfono y dirección). También usamos servicios de Google (Google Sheets y Firebase) para guardar la información de forma segura. No vendemos ni rentamos tus datos.</p>' +
-      '<h4>Tus derechos (ARCO)</h4><p>Tienes derecho a <b>A</b>cceder a tus datos, <b>R</b>ectificarlos, <b>C</b>ancelarlos u <b>O</b>ponerte a su uso, así como a revocar tu consentimiento. Para hacerlo, escríbenos por ' + contacto + ' con tu nombre, el derecho que quieres ejercer y una forma de identificarte. Te responderemos en un máximo de 20 días hábiles. También puedes corregir tus datos desde "Mi cuenta".</p>' +
-      '<h4>Cookies y almacenamiento</h4><p>La página guarda en tu navegador tu bolsa de compra y tu sesión para que no se pierdan. No usamos cookies de publicidad.</p>' +
-      '<h4>Cambios a este aviso</h4><p>Si este aviso cambia, publicaremos la versión nueva en esta misma página.</p>' +
-      '<p class="nota">Última actualización: ' + fecha + '.</p>';
+    return { tienda: esc(T.nombre || 'Vale Shop'), resp: esc(T.titular || T.nombre || 'Vale Shop'), dom: T.domicilio ? esc(T.domicilio) : '', contacto,
+      fecha: new Date(2026, 10, 13).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }) };
+  }
+  function abrirLegal(html) {
+    $('#avisoTexto').innerHTML = html;
     const m = $('#avisoModal'); m.classList.add('abierto'); m.setAttribute('aria-hidden', 'false'); $('#avisoTexto').parentNode.scrollTop = 0;
+  }
+  function abrirAviso() {
+    const D = datosLegales();
+    abrirLegal(
+      '<h3>Aviso de privacidad</h3>' +
+      '<p><b>' + D.resp + '</b>, que opera la tienda en línea <b>' + D.tienda + '</b>' + (D.dom ? ', con domicilio en ' + D.dom : '') + ', es responsable del uso y protección de tus datos personales, de acuerdo con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Puedes contactarnos por ' + D.contacto + '.</p>' +
+      '<h4>¿Qué datos recabamos?</h4><ul><li>Nombre completo.</li><li>Correo electrónico.</li><li>Número de teléfono / WhatsApp.</li><li>Dirección de envío y código postal.</li><li>Tu historial de pedidos, lista de deseos y reseñas.</li></ul>' +
+      '<p>No recabamos datos personales sensibles ni datos de tarjetas: los pagos se hacen por transferencia o depósito directamente en tu banco.</p>' +
+      '<h4>¿Para qué los usamos?</h4><p>Finalidades necesarias para darte el servicio:</p><ul><li>Procesar, confirmar y enviar tus pedidos.</li><li>Cotizar el envío y generar la guía con la paquetería.</li><li>Comunicarnos contigo por WhatsApp o correo sobre tu pedido, tu pago y el estado de tu paquete.</li><li>Crear y administrar tu cuenta, tu lista de deseos y tus reseñas.</li><li>Atender cambios, devoluciones y aclaraciones.</li></ul>' +
+      '<p>Finalidad voluntaria (no necesaria): enviarte novedades y promociones. Si no quieres recibirlas, avísanos por ' + D.contacto + '; esto no afecta tus compras.</p>' +
+      '<h4>¿Con quién compartimos tus datos?</h4><p>Solo con quienes lo necesitan para entregarte tu pedido: la paquetería y la plataforma de envíos que la contrata (nombre, teléfono y dirección). Usamos servicios de Google (Google Sheets y Firebase) para guardar la información. No vendemos ni rentamos tus datos.</p>' +
+      '<h4>Tus derechos (ARCO)</h4><p>Puedes <b>A</b>cceder a tus datos, <b>R</b>ectificarlos, <b>C</b>ancelarlos u <b>O</b>ponerte a su uso, y también revocar tu consentimiento o limitar su uso. Escríbenos por ' + D.contacto + ' con tu nombre, lo que quieres hacer y una forma de identificarte. Te respondemos en un máximo de 20 días hábiles. También puedes corregir tus datos desde "Mi cuenta". Si consideras que tus derechos no fueron atendidos, puedes acudir a la autoridad en materia de protección de datos personales (Secretaría Anticorrupción y Buen Gobierno).</p>' +
+      '<h4>Cookies y almacenamiento en tu navegador</h4><p>La página guarda en tu navegador solo lo necesario para funcionar: tu bolsa de compra, tu sesión y tus preferencias. No usamos cookies de publicidad ni herramientas que rastreen tu navegación en otros sitios. Puedes borrar estos datos desde la configuración de tu navegador; si lo haces, se vaciará tu bolsa y se cerrará tu sesión.</p>' +
+      '<h4>Cambios a este aviso</h4><p>Si este aviso cambia, publicaremos la versión nueva en esta misma página.</p>' +
+      '<p class="nota">Última actualización: ' + D.fecha + '.</p>');
+  }
+  function abrirTerminos() {
+    const D = datosLegales(), T = estado.tienda, min = T.minimoMayoreo || 12;
+    const dias = T.diasEnvio ? esc(String(T.diasEnvio)) + ' días hábiles' : 'el plazo que te indiquemos al confirmar tu pedido';
+    abrirLegal(
+      '<h3>Términos y condiciones</h3>' +
+      '<p>Estos términos aplican a las compras hechas en <b>' + D.tienda + '</b>. Al hacer un pedido aceptas estos términos y nuestro <a data-aviso>Aviso de privacidad</a>.</p>' +
+      '<h4>Quién vende</h4><p><b>' + D.resp + '</b>' + (D.dom ? ', con domicilio en ' + D.dom : '') + '. Contacto: ' + D.contacto + '.</p>' +
+      '<h4>Productos y precios</h4><ul><li>Todos los precios están en pesos mexicanos (MXN) y son el precio total de cada producto.</li><li>El precio de mayoreo aplica desde ' + min + ' piezas combinadas en el mismo pedido.</li><li>El costo de envío se muestra antes de confirmar tu pedido y se suma al total.</li><li>Las fotos son ilustrativas; el color puede variar un poco según tu pantalla.</li><li>Los productos están sujetos a existencia. Si algo se agota después de tu pedido, te avisamos y te devolvemos tu dinero o te ofrecemos un cambio.</li></ul>' +
+      '<h4>Pagos</h4><p>Aceptamos transferencia bancaria y depósito. Los datos de pago aparecen al confirmar tu pedido. Tu pedido se envía cuando confirmamos tu pago. Nunca te pediremos los datos de tu tarjeta ni contraseñas.</p>' +
+      '<h4>Envíos</h4><p>Enviamos a todo México por paquetería. El pedido sale en ' + dias + ' después de confirmar tu pago, y te mandamos tu número de guía por WhatsApp. El tiempo de entrega depende de la paquetería.</p>' +
+      '<h4>Cancelaciones, cambios y devoluciones</h4><ul><li>Puedes cancelar tu pedido antes de que se envíe y te devolvemos el total pagado.</li><li>De acuerdo con el artículo 56 de la Ley Federal de Protección al Consumidor, tienes <b>5 días hábiles</b> desde que recibes tu pedido para cancelar la compra. La prenda debe regresar sin usar y con sus etiquetas, y te devolvemos el precio pagado.</li><li>Si recibes una prenda con defecto o distinta a la que pediste, te la cambiamos o te devolvemos tu dinero, y el envío corre por nuestra cuenta.</li>' + (T.politicas ? '<li>' + esc(T.politicas) + '</li>' : '') + '<li>Para cualquier cambio o devolución escríbenos por ' + D.contacto + '.</li></ul>' +
+      '<h4>Tu cuenta</h4><p>Eres responsable de cuidar tu contraseña. Las reseñas deben ser sobre tu experiencia real; podemos quitar reseñas ofensivas o que no tengan que ver con el producto.</p>' +
+      '<h4>Quejas</h4><p>Si tienes un problema con tu compra, escríbenos primero y lo resolvemos. También puedes acudir a la Procuraduría Federal del Consumidor (Profeco).</p>' +
+      '<h4>Cambios a estos términos</h4><p>Podemos actualizar estos términos; la versión vigente es la publicada en esta página al momento de tu compra. Estos términos se rigen por las leyes de México.</p>' +
+      '<p class="nota">Última actualización: ' + D.fecha + '.</p>');
+  }
+  function avisoCookies() {
+    let visto = false; try { visto = localStorage.getItem('vs-cookies') === '1'; } catch (e) {}
+    const b = $('#cookies'); if (!b || visto) return;
+    b.hidden = false; requestAnimationFrame(() => b.classList.add('visible'));
+    $('#cookiesOk').onclick = () => { try { localStorage.setItem('vs-cookies', '1'); } catch (e) {} b.classList.remove('visible'); setTimeout(() => { b.hidden = true; }, 250); };
   }
   function cerrarAviso() { const m = $('#avisoModal'); m.classList.remove('abierto'); m.setAttribute('aria-hidden', 'true'); }
 
@@ -524,7 +552,7 @@
       const d = await api({ accion: 'catalogo' });
       if (!d.ok) throw new Error(d.error);
       estado.tienda = d.tienda || {}; estado.productos = d.productos || [];
-      limpiarBolsa(); aplicarTienda(); pintarCategorias(d.categorias); pintarCatalogo(); contadores();
+      limpiarBolsa(); aplicarTienda(); pintarCategorias(d.categorias); pintarCatalogo(); contadores(); avisoCookies();
     } catch (e) {
       if (!silencioso) $('#rejilla').innerHTML = '<div class="vacio">No pudimos cargar la colección. Recarga la página.</div>';
     }
@@ -561,6 +589,7 @@
     const tarjeta = t.closest('.tarjeta'); if (tarjeta) { abrirFicha(tarjeta.dataset.id); return; }
     const f = t.closest('[data-filtro]'); if (f) { estado.filtro = f.dataset.filtro; estado.busqueda = ''; $('#inputBuscar').value = ''; cerrarTodo(); pintarCatalogo(); document.querySelector('.filtros').scrollIntoView({ behavior: 'smooth' }); return; }
     if (t.closest('[data-aviso]')) { e.preventDefault(); abrirAviso(); return; }
+    if (t.closest('[data-terminos]')) { e.preventDefault(); abrirTerminos(); return; }
     if (t.closest('[data-cerrar-aviso]') || t.id === 'avisoModal') { cerrarAviso(); return; }
     if (t.closest('[data-cerrar]') || t.id === 'velo' || t.id === 'modal') { cerrarTodo(); return; }
     const ab = t.closest('[data-abrir]'); if (ab) { ({ cuenta: () => formCuenta(), deseos: verDeseos, pedidos: verPedidos })[ab.dataset.abrir](); return; }

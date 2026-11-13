@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=7">
+  <link rel="stylesheet" href="css/estilos.css?v=8">
   <link rel="icon" type="image/png" href="img/logo.png">
 </head>
 <body>
@@ -163,6 +163,7 @@
       <a id="lnkFace" target="_blank" rel="noopener" hidden>Facebook</a>
       <a id="lnkTik" target="_blank" rel="noopener" hidden>TikTok</a>
       <a href="#" id="lnkPoliticas">Cambios y devoluciones</a>
+      <a href="#" data-terminos>Términos y condiciones</a>
       <a href="#" data-aviso>Aviso de privacidad</a>
     </div>
     <p class="pie-mini" id="pieHorario"></p>
@@ -211,7 +212,13 @@
     </div>
   </div>
 
-  <!-- Aviso de privacidad -->
+  <!-- Aviso de cookies -->
+  <div class="cookies" id="cookies" role="region" aria-label="Aviso de cookies" hidden>
+    <p>Esta página solo guarda en tu navegador lo necesario para tu bolsa y tu sesión. No usamos cookies de publicidad. <a href="#" data-aviso>Más información</a></p>
+    <button class="btn" id="cookiesOk" type="button">Entendido</button>
+  </div>
+
+  <!-- Aviso de privacidad / Términos -->
   <div class="modal modal-aviso" id="avisoModal" aria-hidden="true">
     <div class="modal-caja aviso-caja" role="dialog" aria-modal="true" aria-label="Aviso de privacidad">
       <button class="icono modal-cerrar" data-cerrar-aviso>✕</button>
@@ -222,9 +229,9 @@
   <div class="velo" id="velo"></div>
   <div class="toast" id="toast"></div>
 
-  <script src="js/config.js?v=7"></script>
-  <script src="js/animaciones.js?v=7"></script>
-  <script src="js/auth.js?v=7"></script>
-  <script src="js/app.js?v=7"></script>
+  <script src="js/config.js?v=8"></script>
+  <script src="js/animaciones.js?v=8"></script>
+  <script src="js/auth.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>
