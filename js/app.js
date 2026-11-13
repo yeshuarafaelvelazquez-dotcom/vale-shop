@@ -52,8 +52,8 @@
   function aviso(txt) { const t = $('#toast'); t.textContent = txt; t.classList.add('visible'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('visible'), 2600); }
 
   /* ---------- Paneles ---------- */
-  function abrir(el) { cerrarTodo(); el.classList.add('abierto'); el.setAttribute('aria-hidden', 'false'); $('#velo').classList.add('visible'); document.body.style.overflow = 'hidden'; }
-  function cerrarTodo() { $$('.panel.abierto, .modal.abierto').forEach(e => { e.classList.remove('abierto'); e.setAttribute('aria-hidden', 'true'); }); $('#velo').classList.remove('visible'); document.body.style.overflow = ''; }
+  function abrir(el) { cerrarTodo(); el.classList.add('abierto'); el.setAttribute('aria-hidden', 'false'); if (el.id === 'panelMenu') $('#btnMenu').setAttribute('aria-expanded', 'true'); $('#velo').classList.add('visible'); document.body.style.overflow = 'hidden'; }
+  function cerrarTodo() { $$('.panel.abierto, .modal.abierto').forEach(e => { e.classList.remove('abierto'); e.setAttribute('aria-hidden', 'true'); }); $('#btnMenu').setAttribute('aria-expanded', 'false'); $('#velo').classList.remove('visible'); document.body.style.overflow = ''; }
   function panelGen(titulo, html) { $('#genTitulo').textContent = titulo; $('#genCuerpo').innerHTML = html; abrir($('#panelGen')); $('#genCuerpo').scrollTop = 0; }
 
   /* ---------- Catálogo ---------- */

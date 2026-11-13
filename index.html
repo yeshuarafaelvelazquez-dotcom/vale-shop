@@ -22,15 +22,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=6">
+  <link rel="stylesheet" href="css/estilos.css?v=7">
   <link rel="icon" type="image/png" href="img/logo.png">
 </head>
 <body>
+  <a class="salto-link" href="#catalogo">Saltar al catálogo</a>
 
   <!-- Encabezado -->
   <header class="cabecera" id="cabecera">
     <div class="cab-izq">
-      <button class="icono" id="btnMenu" aria-label="Menú">
+      <button class="icono" id="btnMenu" aria-label="Menú" aria-expanded="false" aria-controls="panelMenu">
         <svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
       </button>
       <nav class="nav-principal" aria-label="Secciones">
@@ -127,8 +128,8 @@
     </nav>
 
     <!-- Catálogo -->
-    <section class="catalogo">
-      <div class="catalogo-cabeza" data-revelar>
+    <section class="catalogo" id="catalogo" tabindex="-1">
+      <div class="catalogo-cabeza">
         <h2 id="tituloCatalogo">Todo</h2>
         <span id="totalProductos"></span>
       </div>
@@ -139,7 +140,7 @@
 
     <!-- Mayoreo -->
     <section class="banda">
-      <div data-revelar>
+      <div>
         <p class="sobre">Para revendedoras</p>
         <h2>Precio de <em>mayoreo</em> desde <span data-minimo>12</span> piezas</h2>
         <p>Combina modelos, tallas y colores. El precio de mayoreo se aplica solo en tu bolsa.</p>
@@ -148,9 +149,9 @@
 
     <!-- Nosotras -->
     <section class="info" id="nosotros">
-      <div data-revelar><h3>Envíos a todo México</h3><p>Cotizamos con la paquetería más barata para tu código postal.</p></div>
-      <div data-revelar style="--r:120ms"><h3>Pago seguro</h3><p>Transferencia o depósito, con confirmación por WhatsApp.</p></div>
-      <div data-revelar style="--r:240ms"><h3>Seguimiento por WhatsApp</h3><p>Te avisamos cuando tu pedido sale y te mandamos tu guía.</p></div>
+      <div><h3>Envíos a todo México</h3><p>Cotizamos con la paquetería más barata para tu código postal.</p></div>
+      <div><h3>Pago seguro</h3><p>Transferencia o depósito, con confirmación por WhatsApp.</p></div>
+      <div><h3>Seguimiento por WhatsApp</h3><p>Te avisamos cuando tu pedido sale y te mandamos tu guía.</p></div>
     </section>
   </main>
 
@@ -221,9 +222,9 @@
   <div class="velo" id="velo"></div>
   <div class="toast" id="toast"></div>
 
-  <script src="js/config.js?v=6"></script>
-  <script src="js/animaciones.js?v=6"></script>
-  <script src="js/auth.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/config.js?v=7"></script>
+  <script src="js/animaciones.js?v=7"></script>
+  <script src="js/auth.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>
